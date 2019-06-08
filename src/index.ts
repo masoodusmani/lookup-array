@@ -2,6 +2,7 @@
   Goal: create a version of the most commonly used data structure in JS, an array with an object store.
   The array for fast iteration and maintaining order and the object for fast lookup
 */
+// TODO: hook into any kind of array element addition, or don't extend from Array
 export class LookupArray<T> extends Array {
   private store: LookupArrayStore<T> = {};
   private defaultOptions: LookupArrayOptions = {
@@ -11,7 +12,7 @@ export class LookupArray<T> extends Array {
     comparator: (a, b) => a[this.options.id] > b[this.options.id]
   };
   private options: LookupArrayOptions;
-  constructor(array: T[], options: LookupArrayOptions) {
+  constructor(array: T[], options?: DefaultLookupArrayOptions) {
     super(...(array as any));
     this.options = {
       ...this.defaultOptions,
@@ -19,13 +20,13 @@ export class LookupArray<T> extends Array {
     };
     // Create store with id as keys
     this.store = array.reduce((memo: LookupArrayStore<T>, curr) => {
-      const id = (curr as any)[options.id];
+      const id = (curr as any)[this.options.id];
       memo[id] = curr;
       return memo;
     }, {});
     return this;
   }
-  getById(id: string) {
+  getById(id: string | number) {
     return this.store[id];
   }
   sortedInsert(element: T) {
@@ -59,4 +60,10 @@ export type LookupArrayOptions = {
   isSorted: boolean;
   order: 'asc' | 'desc';
   comparator: (A: any, B: any) => boolean;
+};
+type DefaultLookupArrayOptions = {
+  id?: string;
+  isSorted?: boolean;
+  order?: 'asc' | 'desc';
+  comparator?: (A: any, B: any) => boolean;
 };
